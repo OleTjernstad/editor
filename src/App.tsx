@@ -12,6 +12,7 @@ import IconButton from "@mui/material/IconButton";
 import ImageIcon from "@mui/icons-material/Image";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
+import { NewImage } from "./components/imageZone";
 import TextField from "@mui/material/TextField";
 
 const regex = /(?<paragraph>.+)(\r?\n)?/gm;
@@ -142,6 +143,20 @@ function App() {
           case "h6":
             return (
               <TitleField
+                block={c}
+                update={update}
+                key={c.key}
+                addModule={addModule}
+                isFocused={isFocused.current}
+                removeBlock={removeBlock}
+                resetFocus={resetFocus}
+                updateFocus={updateFocus}
+                updateBlockType={updateBlockType}
+              />
+            );
+          case "image":
+            return (
+              <ImageField
                 block={c}
                 update={update}
                 key={c.key}
@@ -334,6 +349,59 @@ function TitleField({
         onKeyUp={handleKeyUp}
         onFocus={() => updateFocus(block.key)}
       />
+    </Box>
+  );
+}
+type ImageFieldProps = FieldProps;
+function ImageField({
+  block,
+  update,
+  addModule,
+  isFocused,
+  removeBlock,
+  resetFocus,
+  updateFocus,
+  updateBlockType,
+}: ImageFieldProps) {
+  const inputElement = useRef<HTMLTextAreaElement>(null);
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      addModule(block.key);
+      update(block.key, block.text + " ");
+    }
+  }
+  function handleKeyUp(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (
+      (e.key === "Backspace" || e.key === "Delete") &&
+      block.text.length === 0
+    ) {
+      removeBlock(block.key);
+    }
+  }
+
+  useEffect(() => {
+    if (block.key === resetFocus) {
+      inputElement.current?.focus();
+    }
+  }, [block.key, resetFocus]);
+
+  function handleUpdate(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    update(block.key, e.target.value);
+  }
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "row" }}>
+      <BlockDialog
+        block={block}
+        isActive={resetFocus === block.key}
+        updateBlockType={updateBlockType}
+        deleteBlock={removeBlock}
+        icon={<GrainIcon />}
+      />
+      <NewImage setImage={console.log} />
     </Box>
   );
 }
