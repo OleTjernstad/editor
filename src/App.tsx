@@ -62,10 +62,7 @@ function App() {
       });
     });
   }
-  function updateBlockType(key: string | undefined, type: BlockType) {
-    if (key === undefined) {
-      addModule(isFocused.current, type);
-    }
+  function updateBlockType(key: string, type: BlockType) {
     setContent((prev) => {
       return prev.map((block) => {
         if (block.key === key) return { ...block, type };
@@ -74,11 +71,16 @@ function App() {
     });
   }
 
-  function addModule(keyBefore: string | undefined, type?: BlockType) {
+  function addModule(
+    keyBefore: string | undefined,
+    type?: BlockType,
+    reset?: boolean
+  ) {
     const createdKey = createId();
     console.log(createdKey);
 
     isFocused.current = createdKey;
+
     setContent((prev) => {
       const index = prev.findIndex((block) => block.key === keyBefore);
 
@@ -90,6 +92,9 @@ function App() {
       });
       return content;
     });
+    if (reset) {
+      setResetFocus(createdKey);
+    }
   }
 
   function removeBlock(key: string) {
@@ -107,6 +112,17 @@ function App() {
     setResetFocus(key);
   }
 
+  function handleNewBlock(type: BlockType) {
+    console.log({ type });
+    let key = isFocused.current;
+    if (!isFocused.current) {
+      if (content.length > 0) {
+        key = content[content.length - 1].key;
+      }
+    }
+    addModule(key, type, true);
+  }
+
   return (
     <div>
       <BlockDialog
@@ -114,6 +130,7 @@ function App() {
         updateBlockType={updateBlockType}
         deleteBlock={removeBlock}
         icon={<AddIcon />}
+        addNewBlock={handleNewBlock}
       />
       {content.map((c) => {
         switch (c.type) {
@@ -167,7 +184,7 @@ interface FieldProps {
   updateFocus: (key: string) => void;
   removeBlock: (key: string) => void;
   resetFocus: string | undefined;
-  updateBlockType: (key: string | undefined, type: BlockType) => void;
+  updateBlockType: (key: string, type: BlockType) => void;
 }
 
 type ParagraphFieldProps = FieldProps;
@@ -341,15 +358,23 @@ function headerStyle(header: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | string) {
 interface SelectBlockTypeProps {
   isActive: boolean;
   block?: Block;
-  updateBlockType: (key: string | undefined, type: BlockType) => void;
+  updateBlockType: (key: string, type: BlockType) => void;
+  addNewBlock?: (type: BlockType) => void;
 }
 function SelectBlockType({
   isActive,
   block,
   updateBlockType,
+  addNewBlock,
 }: SelectBlockTypeProps) {
   const handleChange = (event: SelectChangeEvent) => {
-    if (block) updateBlockType(block.key, event.target.value as BlockType);
+    if (block) {
+      updateBlockType(block.key, event.target.value as BlockType);
+      return;
+    }
+    if (addNewBlock) {
+      addNewBlock(event.target.value as BlockType);
+    }
   };
 
   return (
@@ -359,14 +384,15 @@ function SelectBlockType({
       size="small"
       fullWidth
     >
-      <InputLabel id="demo-simple-select-label">Tekst</InputLabel>
+      <InputLabel id="block-type-select-label">Tekst</InputLabel>
       <Select
-        labelId="demo-simple-select-label"
-        id="demo-simple-select"
-        value={block?.type}
+        labelId="block-type-select-label"
+        id="block-type-select"
+        value={block?.type ?? ""}
         label="Age"
         onChange={handleChange}
       >
+        <MenuItem value={""}></MenuItem>
         <MenuItem value={"paragraph"}>Tekst</MenuItem>
         <MenuItem value={"h1"}>Tittel 1</MenuItem>
         <MenuItem value={"h2"}>Tittel 2</MenuItem>
@@ -394,10 +420,21 @@ function BlockDialog(props: BlockDialogProps) {
     setOpen(false);
   };
 
+  function handleUpdate(key: string | undefined, type: BlockType) {
+    if (props.addNewBlock) {
+      props.addNewBlock(type);
+      handleClose();
+      return;
+    }
+    if (key) {
+      props.updateBlockType(key, type);
+    }
+  }
+
   return (
     <div>
       <IconButton
-        aria-label="delete"
+        aria-label="open tekst edit dialog"
         disabled={!props.isActive}
         onClick={handleClickOpen}
         sx={{
@@ -411,7 +448,10 @@ function BlockDialog(props: BlockDialogProps) {
       </IconButton>
       <Dialog open={open} onClose={handleClose}>
         <DialogContent>
-          <SelectBlockType {...props} />
+          <SelectBlockType
+            {...props}
+            addNewBlock={(type) => handleUpdate(undefined, type)}
+          />
           {props?.block?.key ? (
             <IconButton
               aria-label="delete"
@@ -425,7 +465,7 @@ function BlockDialog(props: BlockDialogProps) {
             <IconButton
               aria-label="add image"
               disabled={!props.isActive}
-              onClick={() => props.updateBlockType(undefined, "image")}
+              onClick={() => handleUpdate(undefined, "image")}
             >
               <ImageIcon />
             </IconButton>
