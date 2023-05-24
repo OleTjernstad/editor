@@ -15,6 +15,8 @@ import MenuItem from "@mui/material/MenuItem";
 import { NewImage } from "./components/imageZone";
 import TextField from "@mui/material/TextField";
 
+// import img from "../public/vite.svg";
+
 const regex = /(?<paragraph>.+)(\r?\n)?/gm;
 
 type BlockType =
@@ -26,10 +28,17 @@ type BlockType =
   | "h5"
   | "h6"
   | "image";
+
+type BlockImage = {
+  name: string;
+  height: number;
+  width: number;
+};
 interface Block {
   key: string;
   text: string;
   type: BlockType;
+  image?: BlockImage | undefined;
 }
 type Content = Block[];
 
@@ -365,6 +374,10 @@ function ImageField({
 }: ImageFieldProps) {
   const inputElement = useRef<HTMLTextAreaElement>(null);
 
+  const [selectImage, setSelectImage] = useState<boolean>(false);
+  const [image, setImage] = useState<File>();
+  const [showImageMeta, setShowImageMeta] = useState<boolean>(false);
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       addModule(block.key);
@@ -386,11 +399,9 @@ function ImageField({
     }
   }, [block.key, resetFocus]);
 
-  function handleUpdate(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) {
-    update(block.key, e.target.value);
-  }
+  // function handleUpdate(file: File[]) {
+  //   update(block.key, e.target.value);
+  // }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "row" }}>
@@ -401,7 +412,11 @@ function ImageField({
         deleteBlock={removeBlock}
         icon={<GrainIcon />}
       />
-      <NewImage setImage={console.log} />
+      {selectImage || !block.image ? (
+        <NewImage setImage={(files) => setImage(files[0])} />
+      ) : (
+        <img src={"/vite.svg"} />
+      )}
     </Box>
   );
 }
