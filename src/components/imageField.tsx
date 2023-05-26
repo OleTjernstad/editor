@@ -4,6 +4,7 @@ import { FieldProps } from "../types";
 import GrainIcon from "@mui/icons-material/Grain";
 import { ImageDialog } from "./imageDialog";
 import { NewImage } from "./imageZone";
+import { getImageSize } from "react-image-size";
 import { useState } from "react";
 
 type ImageFieldProps = FieldProps;
@@ -21,10 +22,14 @@ export function ImageField({
   const [image, setImage] = useState<File>();
   const [imageUrl, setImageUrl] = useState<string>();
   const [showImageMeta, setShowImageMeta] = useState<boolean>(false);
+  const [baseSize, setBaseSize] = useState<{ height: number; width: number }>();
 
-  function handleImage(files: File[]) {
+  async function handleImage(files: File[]) {
     setImage(files[0]);
-    setImageUrl(URL.createObjectURL(files[0]));
+    const imgUrl = URL.createObjectURL(files[0]);
+    const dimensions = await getImageSize(imgUrl);
+    setBaseSize(dimensions);
+    setImageUrl(imgUrl);
     setSelectImage(false);
   }
 
@@ -53,7 +58,7 @@ export function ImageField({
               left: 15,
             }}
           >
-            <ImageDialog />
+            <ImageDialog baseSize={baseSize} />
           </Box>
         </Box>
       )}
