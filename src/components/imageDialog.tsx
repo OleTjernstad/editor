@@ -36,6 +36,17 @@ export function ImageDialog({ baseSize }: ImageDialogProps) {
     setOpen(false);
   };
 
+  function handleUpdateWidth(width: number) {
+    if (aspectRatioLock) {
+      if (baseSize) {
+        setHeight(
+          Math.ceil(determineNewHeight(baseSize.height, baseSize.width, width))
+        );
+      }
+    }
+    setWidth(width);
+  }
+
   // function handleUpdate(key: string | undefined, type: BlockType) {
   //   if (props.addNewBlock) {
   //     props.addNewBlock(type);
@@ -64,7 +75,7 @@ export function ImageDialog({ baseSize }: ImageDialogProps) {
               <OutlinedInput
                 fullWidth
                 value={width}
-                onChange={(e) => setWidth(Number(e.target.value))}
+                onChange={(e) => handleUpdateWidth(Number(e.target.value))}
                 id="width-input"
                 startAdornment={
                   <InputAdornment position="start">
@@ -112,4 +123,12 @@ export function ImageDialog({ baseSize }: ImageDialogProps) {
       </Dialog>
     </div>
   );
+}
+
+function determineNewHeight(
+  originalHeight: number,
+  originalWidth: number,
+  newWidth: number
+) {
+  return (originalHeight / originalWidth) * newWidth;
 }
