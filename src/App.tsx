@@ -1,4 +1,4 @@
-import { BlockType, Content } from "./types";
+import { Block, BlockType, Blocks, Content } from "./types";
 import { useRef, useState } from "react";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -8,21 +8,30 @@ import { ParagraphField } from "./components/paragraph";
 import { TitleField } from "./components/titleField";
 
 function App() {
-  const [content, setContent] = useState<Content>([
+  const [content, setContent] = useState<Blocks>([
     {
       key: "dfdg",
-      text: "Tittel tekst",
-      type: "h1",
+      content: {
+        text: "Tittel tekst",
+        level: "h1",
+      },
+      type: "text",
     },
     {
       key: "iostuhwhhth",
-      text: "Dette er tekst",
-      type: "paragraph",
+      content: {
+        text: "Dette er tekst",
+        level: "paragraph",
+      },
+      type: "text",
     },
     {
       key: "iostsgbergbwhhth",
-      text: "Dette er også en tekst",
-      type: "paragraph",
+      content: {
+        text: "Dette er også en tekst",
+        level: "paragraph",
+      },
+      type: "text",
     },
   ]);
 
@@ -46,11 +55,17 @@ function App() {
     });
   }
 
-  function addModule(
-    keyBefore: string | undefined,
-    type?: BlockType,
-    reset?: boolean
-  ) {
+  function addModule({
+    keyBefore,
+    reset,
+    content,
+    type,
+  }: {
+    keyBefore: string | undefined;
+    reset?: boolean;
+    type: BlockType;
+    content: Content;
+  }) {
     const createdKey = createId();
     console.log(createdKey);
 
@@ -59,13 +74,21 @@ function App() {
     setContent((prev) => {
       const index = prev.findIndex((block) => block.key === keyBefore);
 
-      const content = prev;
-      content.splice(index + 1, 0, {
+      const blocks = prev;
+      if (type === "image") {
+        blocks.splice(index + 1, 0, {
+          key: createdKey,
+          content: { image: content?.image },
+          type: type,
+        });
+        return blocks;
+      }
+      blocks.splice(index + 1, 0, {
         key: createdKey,
-        text: "",
-        type: type ?? "paragraph",
+        content: { level: content?.level, text: content?.text },
+        type: type,
       });
-      return content;
+      return blocks;
     });
     if (reset) {
       setResetFocus(createdKey);
@@ -87,7 +110,7 @@ function App() {
     setResetFocus(key);
   }
 
-  function handleNewBlock(type: BlockType) {
+  function handleNewBlock(type: BlockType, _content: Content) {
     console.log({ type });
     let key = isFocused.current;
     if (!isFocused.current) {
@@ -95,7 +118,12 @@ function App() {
         key = content[content.length - 1].key;
       }
     }
-    addModule(key, type, true);
+    addModule({
+      keyBefore: key,
+      type,
+      reset: true,
+      content: _content,
+    });
   }
 
   return (
@@ -109,12 +137,22 @@ function App() {
       />
       {content.map((c) => {
         switch (c.type) {
-          case "h1":
-          case "h2":
-          case "h3":
-          case "h4":
-          case "h5":
-          case "h6":
+          case "text":
+            if (c.content?.level === "paragraph") {
+              return (
+                <ParagraphField
+                  block={c}
+                  update={update}
+                  key={c.key}
+                  addModule={addModule}
+                  isFocused={isFocused.current}
+                  removeBlock={removeBlock}
+                  resetFocus={resetFocus}
+                  updateFocus={updateFocus}
+                  updateBlockType={updateBlockType}
+                />
+              );
+            }
             return (
               <TitleField
                 block={c}

@@ -1,12 +1,6 @@
-export type BlockType =
-  | "paragraph"
-  | "h1"
-  | "h2"
-  | "h3"
-  | "h4"
-  | "h5"
-  | "h6"
-  | "image";
+export type BlockType = "text" | "image";
+
+export type TextLevel = "paragraph" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 
 export type BlockImage = {
   name: string;
@@ -14,14 +8,19 @@ export type BlockImage = {
   width: number;
 };
 
-export interface Block {
-  key: string;
-  text: string;
-  type: BlockType;
+export interface Content {
+  text?: string | undefined;
+  level?: TextLevel | undefined;
   image?: BlockImage | undefined;
 }
 
-export type Content = Block[];
+export type Block = {
+  key: string;
+  type: BlockType;
+  content: Content | undefined;
+};
+
+export type Blocks = Block[];
 
 export interface FieldProps {
   block: Block;

@@ -1,4 +1,4 @@
-import { Block, BlockType } from "../types";
+import { Block, TextLevel } from "../types";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 
 import FormControl from "@mui/material/FormControl";
@@ -8,22 +8,22 @@ import MenuItem from "@mui/material/MenuItem";
 export interface SelectBlockTypeProps {
   isActive: boolean;
   block?: Block;
-  updateBlockType: (key: string, type: BlockType) => void;
-  addNewBlock?: (type: BlockType) => void;
+  updateLevel: (key: string, level: TextLevel) => void;
+  addNewTextLevel?: (level: TextLevel) => void;
 }
 export function SelectBlockType({
   isActive,
   block,
-  updateBlockType,
-  addNewBlock,
+  updateLevel,
+  addNewTextLevel,
 }: SelectBlockTypeProps) {
   const handleChange = (event: SelectChangeEvent) => {
     if (block) {
-      updateBlockType(block.key, event.target.value as BlockType);
+      updateLevel(block.key, event.target.value as TextLevel);
       return;
     }
-    if (addNewBlock) {
-      addNewBlock(event.target.value as BlockType);
+    if (addNewTextLevel) {
+      addNewTextLevel(event.target.value as TextLevel);
     }
   };
 
