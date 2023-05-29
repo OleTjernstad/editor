@@ -70,7 +70,6 @@ function App() {
     activeKey: string | undefined
   ) {
     const createdKey = createId();
-    console.log(createdKey);
 
     isFocused.current = createdKey;
 
@@ -114,7 +113,6 @@ function App() {
   }
 
   function handleNewBlock({ data, type }: { type: BlockType; data: Data }) {
-    console.log({ type });
     let key = isFocused.current;
     if (!isFocused.current) {
       if (content.length > 0) {
@@ -130,7 +128,7 @@ function App() {
       key
     );
   }
-
+  console.log(content);
   return (
     <div>
       <BlockDialog
@@ -143,9 +141,7 @@ function App() {
       {content.map((c) => {
         switch (c.type) {
           case "text":
-            console.log(c);
             if (c.data?.level === "paragraph") {
-              console.log("paragraph");
               return (
                 <ParagraphField
                   block={c}
