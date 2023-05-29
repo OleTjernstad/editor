@@ -19,7 +19,7 @@ export function ImageField({
 }: ImageFieldProps) {
   const [selectImage, setSelectImage] = useState<boolean>(true);
   const [image, setImage] = useState<File>();
-  const [imageUrl, setImageUrl] = useState<string>();
+
   const [showImageMeta, setShowImageMeta] = useState<boolean>(false);
   const [baseSize, setBaseSize] = useState<{ height: number; width: number }>();
 
@@ -28,7 +28,15 @@ export function ImageField({
     const imgUrl = URL.createObjectURL(files[0]);
     const dimensions = await getImageSize(imgUrl);
     setBaseSize(dimensions);
-    setImageUrl(imgUrl);
+    update({
+      data: {
+        image: {
+          ...dimensions,
+          name: imgUrl,
+        },
+      },
+      key: block.key,
+    });
     setSelectImage(false);
   }
 
@@ -49,7 +57,11 @@ export function ImageField({
             position: "relative",
           }}
         >
-          <img src={imageUrl} />
+          <img
+            src={block.data?.image?.name}
+            width={block.data?.image?.width}
+            height={block.data?.image?.height}
+          />
           <Box
             sx={{
               position: "absolute",
@@ -57,7 +69,21 @@ export function ImageField({
               left: 15,
             }}
           >
-            <ImageDialog baseSize={baseSize} />
+            <ImageDialog
+              baseSize={baseSize}
+              updateDimensions={(dim) =>
+                update({
+                  data: {
+                    image: {
+                      name: block.data?.image?.name ?? "",
+                      ...dim,
+                    },
+                  },
+                  key: block.key,
+                })
+              }
+              blockImage={{ image: block.data?.image }}
+            />
           </Box>
         </Box>
       )}

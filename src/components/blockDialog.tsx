@@ -52,15 +52,26 @@ export function BlockDialog({
       });
   }
 
-  function handleUpdate(key: string | undefined, type: BlockType) {
-    // if (addNewBlock) {
-    //   addNewBlock(type);
-    //   handleClose();
-    //   return;
-    // }
-    // if (key) {
-    //   updateBlockType(key, type);
-    // }
+  function handleUpdate(type: BlockType) {
+    if (type === "image") {
+      if (addNewBlock) {
+        addNewBlock({
+          data: {
+            image: {
+              height: 0,
+              name: "",
+              width: 0,
+            },
+          },
+          type,
+        });
+        handleClose();
+        return;
+      }
+      // if (key) {
+      //   updateBlockType(key, type);
+      // }}
+    }
   }
 
   return (
@@ -81,7 +92,9 @@ export function BlockDialog({
       <Dialog open={open} onClose={handleClose}>
         <DialogContent>
           <SelectBlockType
-            isActive={isActive && block?.type === "text"}
+            isActive={
+              isActive && (block?.type === "text" || block?.type === undefined)
+            }
             updateLevel={handleTextLevel}
             block={block}
           />
@@ -98,7 +111,7 @@ export function BlockDialog({
             <IconButton
               aria-label="add image"
               disabled={!isActive}
-              onClick={() => handleUpdate(undefined, "image")}
+              onClick={() => handleUpdate("image")}
             >
               <ImageIcon />
             </IconButton>

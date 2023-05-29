@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
-
 import AspectRatioIcon from "@mui/icons-material/AspectRatio";
 import Button from "@mui/material/Button";
+import { Data } from "../types";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import FormControl from "@mui/material/FormControl";
@@ -11,22 +10,21 @@ import InputLabel from "@mui/material/InputLabel";
 import LockIcon from "@mui/icons-material/Lock";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import SettingsSuggestIcon from "@mui/icons-material/SettingsSuggest";
+import { useState } from "react";
 
 interface ImageDialogProps {
   baseSize: { height: number; width: number } | undefined;
+  blockImage: Pick<Data, "image">;
+  updateDimensions: (dim: { height: number; width: number }) => void;
 }
-export function ImageDialog({ baseSize }: ImageDialogProps) {
+export function ImageDialog({
+  baseSize,
+  updateDimensions,
+  blockImage,
+}: ImageDialogProps) {
   const [open, setOpen] = useState(false);
 
-  const [height, setHeight] = useState<number>();
-
-  const [width, setWidth] = useState<number>();
   const [aspectRatioLock, setAspectRatioLock] = useState<boolean>(true);
-
-  useEffect(() => {
-    setHeight(baseSize?.height);
-    setWidth(baseSize?.width);
-  }, [baseSize]);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -39,12 +37,19 @@ export function ImageDialog({ baseSize }: ImageDialogProps) {
   function handleUpdateWidth(width: number) {
     if (aspectRatioLock) {
       if (baseSize) {
-        setHeight(
-          Math.ceil(determineNewHeight(baseSize.height, baseSize.width, width))
-        );
+        updateDimensions({
+          height: Math.ceil(
+            determineNewHeight(baseSize.height, baseSize.width, width)
+          ),
+          width,
+        });
       }
+      return;
     }
-    setWidth(width);
+    updateDimensions({
+      height: blockImage.image?.height ?? 0,
+      width,
+    });
   }
 
   // function handleUpdate(key: string | undefined, type: BlockType) {
@@ -74,7 +79,7 @@ export function ImageDialog({ baseSize }: ImageDialogProps) {
               <InputLabel htmlFor="width-input">Bredde</InputLabel>
               <OutlinedInput
                 fullWidth
-                value={width}
+                value={blockImage.image?.width ?? 0}
                 onChange={(e) => handleUpdateWidth(Number(e.target.value))}
                 id="width-input"
                 startAdornment={
@@ -100,9 +105,14 @@ export function ImageDialog({ baseSize }: ImageDialogProps) {
             >
               <InputLabel htmlFor="height-input">Høyde</InputLabel>
               <OutlinedInput
-                value={height}
+                value={blockImage.image?.height ?? 0}
                 fullWidth
-                onChange={(e) => setHeight(Number(e.target.value))}
+                onChange={(e) =>
+                  updateDimensions({
+                    height: Number(e.target.value),
+                    width: blockImage.image?.width ?? 0,
+                  })
+                }
                 id="height-input"
                 startAdornment={
                   <InputAdornment position="start">
