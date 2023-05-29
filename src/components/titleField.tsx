@@ -25,18 +25,20 @@ export function TitleField({
           type: "text",
           data: {
             level: "paragraph",
+            text: "",
           },
         },
         block.key
       );
       update({
         data: {
-          text: (block.data?.text ?? "") + " ",
+          ...block.data,
         },
         key: block.key,
       });
     }
   }
+
   function handleKeyUp(e: React.KeyboardEvent<HTMLDivElement>) {
     if (
       (e.key === "Backspace" || e.key === "Delete") &&
@@ -58,6 +60,7 @@ export function TitleField({
   ) {
     update({
       data: {
+        ...block.data,
         text: e.target.value,
       },
       key: block.key,
@@ -81,7 +84,7 @@ export function TitleField({
         variant="standard"
         InputProps={{
           disableUnderline: true,
-          style: headerStyle(block.type),
+          style: headerStyle(block.data?.level),
         }}
         onChange={handleUpdate}
         onPaste={(e) => {
@@ -97,7 +100,9 @@ export function TitleField({
   );
 }
 
-function headerStyle(header: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | string) {
+function headerStyle(
+  header: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | string | undefined
+) {
   switch (header) {
     case "h1":
       return {

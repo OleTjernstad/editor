@@ -29,6 +29,7 @@ export function ParagraphField({
           type: "text",
           data: {
             level: "paragraph",
+            text: "",
           },
         },
         block.key
@@ -59,6 +60,7 @@ export function ParagraphField({
 
       update({
         data: {
+          ...block.data,
           text: block.data?.text ?? "",
         },
         key: block.key,
@@ -68,6 +70,7 @@ export function ParagraphField({
 
     update({
       data: {
+        ...block.data,
         text: e.target.value,
       },
       key: block.key,

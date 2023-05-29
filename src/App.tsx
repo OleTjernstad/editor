@@ -41,7 +41,17 @@ function App() {
   function updateBlock({ data, key }: { data: Data; key: string }) {
     setContent((prev) => {
       return prev.map((block) => {
-        if (block.key === key) return { ...block, data };
+        if (block.key === key) {
+          const text = data.text?.replace(/^\r?\n/, "");
+
+          return {
+            ...block,
+            data: {
+              ...data,
+              text,
+            },
+          };
+        }
         return block;
       });
     });
@@ -133,7 +143,9 @@ function App() {
       {content.map((c) => {
         switch (c.type) {
           case "text":
+            console.log(c);
             if (c.data?.level === "paragraph") {
+              console.log("paragraph");
               return (
                 <ParagraphField
                   block={c}
