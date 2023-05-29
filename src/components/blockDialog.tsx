@@ -1,6 +1,6 @@
+import { BlockType, Data, TextLevel } from "../types";
 import { SelectBlockType, SelectBlockTypeProps } from "./selectTextType";
 
-import { BlockType } from "../types";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -8,11 +8,20 @@ import IconButton from "@mui/material/IconButton";
 import ImageIcon from "@mui/icons-material/Image";
 import { useState } from "react";
 
-type BlockDialogProps = SelectBlockTypeProps & {
+type BlockDialogProps = Pick<SelectBlockTypeProps, "isActive" | "block"> & {
   deleteBlock: (key: string) => void;
   icon: React.ReactNode;
+  updateBlock: (props: { data: Data; key: string }) => void;
+  addNewBlock?: (props: { type: BlockType; data: Data }) => void;
 };
-export function BlockDialog(props: BlockDialogProps) {
+export function BlockDialog({
+  deleteBlock,
+  icon,
+  isActive,
+  block,
+  addNewBlock,
+  updateBlock,
+}: BlockDialogProps) {
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
@@ -23,22 +32,42 @@ export function BlockDialog(props: BlockDialogProps) {
     setOpen(false);
   };
 
-  function handleUpdate(key: string | undefined, type: BlockType) {
-    if (props.addNewBlock) {
-      props.addNewBlock(type);
-      handleClose();
+  function handleTextLevel(level: TextLevel) {
+    if (addNewBlock) {
+      addNewBlock({
+        type: "text",
+        data: {
+          level,
+          text: "",
+        },
+      });
       return;
     }
-    if (key) {
-      props.updateBlockType(key, type);
-    }
+    if (block)
+      updateBlock({
+        data: {
+          level,
+        },
+        key: block.key,
+      });
+  }
+
+  function handleUpdate(key: string | undefined, type: BlockType) {
+    // if (addNewBlock) {
+    //   addNewBlock(type);
+    //   handleClose();
+    //   return;
+    // }
+    // if (key) {
+    //   updateBlockType(key, type);
+    // }
   }
 
   return (
     <div>
       <IconButton
         aria-label="open tekst edit dialog"
-        disabled={!props.isActive}
+        disabled={!isActive}
         onClick={handleClickOpen}
         sx={{
           "&.Mui-disabled": {
@@ -47,27 +76,28 @@ export function BlockDialog(props: BlockDialogProps) {
           },
         }}
       >
-        {props.icon}
+        {icon}
       </IconButton>
       <Dialog open={open} onClose={handleClose}>
         <DialogContent>
           <SelectBlockType
-            {...props}
-            addNewBlock={(type) => handleUpdate(undefined, type)}
+            isActive={isActive && block?.type === "text"}
+            updateLevel={handleTextLevel}
+            block={block}
           />
-          {props?.block?.key ? (
+          {block?.key ? (
             <IconButton
               aria-label="delete"
-              disabled={!props.isActive}
-              onClick={() => props.deleteBlock(props?.block?.key ?? "")}
+              disabled={!isActive}
+              onClick={() => deleteBlock(block?.key ?? "")}
             >
               <DeleteIcon />
             </IconButton>
           ) : null}
-          {props?.block?.type === "image" || props?.block === undefined ? (
+          {block?.type === "image" || block === undefined ? (
             <IconButton
               aria-label="add image"
-              disabled={!props.isActive}
+              disabled={!isActive}
               onClick={() => handleUpdate(undefined, "image")}
             >
               <ImageIcon />

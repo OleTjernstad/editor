@@ -16,7 +16,6 @@ export function ImageField({
   removeBlock,
   resetFocus,
   updateFocus,
-  updateBlockType,
 }: ImageFieldProps) {
   const [selectImage, setSelectImage] = useState<boolean>(true);
   const [image, setImage] = useState<File>();
@@ -38,7 +37,7 @@ export function ImageField({
       <BlockDialog
         block={block}
         isActive={resetFocus === block.key}
-        updateBlockType={updateBlockType}
+        updateBlock={update}
         deleteBlock={removeBlock}
         icon={<GrainIcon />}
       />

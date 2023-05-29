@@ -15,20 +15,33 @@ export function TitleField({
   removeBlock,
   resetFocus,
   updateFocus,
-  updateBlockType,
 }: TitleFieldProps) {
   const inputElement = useRef<HTMLTextAreaElement>(null);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
-      addModule(block.key);
-      update(block.key, block.text + " ");
+      addModule(
+        {
+          type: "text",
+          data: {
+            level: "paragraph",
+          },
+        },
+        block.key
+      );
+      update({
+        data: {
+          text: (block.data?.text ?? "") + " ",
+        },
+        key: block.key,
+      });
     }
   }
   function handleKeyUp(e: React.KeyboardEvent<HTMLDivElement>) {
     if (
       (e.key === "Backspace" || e.key === "Delete") &&
-      block.text.length === 0
+      block.data?.text &&
+      block.data.text.length === 0
     ) {
       removeBlock(block.key);
     }
@@ -43,7 +56,12 @@ export function TitleField({
   function handleUpdate(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) {
-    update(block.key, e.target.value);
+    update({
+      data: {
+        text: e.target.value,
+      },
+      key: block.key,
+    });
   }
 
   return (
@@ -51,14 +69,14 @@ export function TitleField({
       <BlockDialog
         block={block}
         isActive={resetFocus === block.key}
-        updateBlockType={updateBlockType}
+        updateBlock={update}
         deleteBlock={removeBlock}
         icon={<GrainIcon />}
       />
       <TextField
         inputRef={inputElement}
         id={block.key}
-        value={block.text}
+        value={block.data?.text ?? ""}
         fullWidth
         variant="standard"
         InputProps={{

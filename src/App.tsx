@@ -1,4 +1,4 @@
-import { Block, BlockType, Blocks, Content } from "./types";
+import { BlockType, Content, Data } from "./types";
 import { useRef, useState } from "react";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -8,10 +8,10 @@ import { ParagraphField } from "./components/paragraph";
 import { TitleField } from "./components/titleField";
 
 function App() {
-  const [content, setContent] = useState<Blocks>([
+  const [content, setContent] = useState<Content>([
     {
       key: "dfdg",
-      content: {
+      data: {
         text: "Tittel tekst",
         level: "h1",
       },
@@ -19,7 +19,7 @@ function App() {
     },
     {
       key: "iostuhwhhth",
-      content: {
+      data: {
         text: "Dette er tekst",
         level: "paragraph",
       },
@@ -27,7 +27,7 @@ function App() {
     },
     {
       key: "iostsgbergbwhhth",
-      content: {
+      data: {
         text: "Dette er også en tekst",
         level: "paragraph",
       },
@@ -38,54 +38,47 @@ function App() {
   const isFocused = useRef<string>();
   const [resetFocus, setResetFocus] = useState<string>();
 
-  function update(key: string, text: string) {
+  function updateBlock({ data, key }: { data: Data; key: string }) {
     setContent((prev) => {
       return prev.map((block) => {
-        if (block.key === key) return { ...block, text };
-        return block;
-      });
-    });
-  }
-  function updateBlockType(key: string, type: BlockType) {
-    setContent((prev) => {
-      return prev.map((block) => {
-        if (block.key === key) return { ...block, type };
+        if (block.key === key) return { ...block, data };
         return block;
       });
     });
   }
 
-  function addModule({
-    keyBefore,
-    reset,
-    content,
-    type,
-  }: {
-    keyBefore: string | undefined;
-    reset?: boolean;
-    type: BlockType;
-    content: Content;
-  }) {
+  function addModule(
+    {
+      reset,
+      data,
+      type,
+    }: {
+      reset?: boolean;
+      type: BlockType;
+      data: Data;
+    },
+    activeKey: string | undefined
+  ) {
     const createdKey = createId();
     console.log(createdKey);
 
     isFocused.current = createdKey;
 
     setContent((prev) => {
-      const index = prev.findIndex((block) => block.key === keyBefore);
+      const index = prev.findIndex((block) => block.key === activeKey);
 
       const blocks = prev;
       if (type === "image") {
         blocks.splice(index + 1, 0, {
           key: createdKey,
-          content: { image: content?.image },
+          data: { image: data?.image },
           type: type,
         });
         return blocks;
       }
       blocks.splice(index + 1, 0, {
         key: createdKey,
-        content: { level: content?.level, text: content?.text },
+        data: { level: data?.level, text: data?.text },
         type: type,
       });
       return blocks;
@@ -110,7 +103,7 @@ function App() {
     setResetFocus(key);
   }
 
-  function handleNewBlock(type: BlockType, _content: Content) {
+  function handleNewBlock({ data, type }: { type: BlockType; data: Data }) {
     console.log({ type });
     let key = isFocused.current;
     if (!isFocused.current) {
@@ -118,19 +111,21 @@ function App() {
         key = content[content.length - 1].key;
       }
     }
-    addModule({
-      keyBefore: key,
-      type,
-      reset: true,
-      content: _content,
-    });
+    addModule(
+      {
+        type,
+        reset: true,
+        data: data,
+      },
+      key
+    );
   }
 
   return (
     <div>
       <BlockDialog
         isActive
-        updateBlockType={updateBlockType}
+        updateBlock={updateBlock}
         deleteBlock={removeBlock}
         icon={<AddIcon />}
         addNewBlock={handleNewBlock}
@@ -138,46 +133,43 @@ function App() {
       {content.map((c) => {
         switch (c.type) {
           case "text":
-            if (c.content?.level === "paragraph") {
+            if (c.data?.level === "paragraph") {
               return (
                 <ParagraphField
                   block={c}
-                  update={update}
+                  update={updateBlock}
                   key={c.key}
                   addModule={addModule}
                   isFocused={isFocused.current}
                   removeBlock={removeBlock}
                   resetFocus={resetFocus}
                   updateFocus={updateFocus}
-                  updateBlockType={updateBlockType}
                 />
               );
             }
             return (
               <TitleField
                 block={c}
-                update={update}
+                update={updateBlock}
                 key={c.key}
                 addModule={addModule}
                 isFocused={isFocused.current}
                 removeBlock={removeBlock}
                 resetFocus={resetFocus}
                 updateFocus={updateFocus}
-                updateBlockType={updateBlockType}
               />
             );
           case "image":
             return (
               <ImageField
                 block={c}
-                update={update}
+                update={updateBlock}
                 key={c.key}
                 addModule={addModule}
                 isFocused={isFocused.current}
                 removeBlock={removeBlock}
                 resetFocus={resetFocus}
                 updateFocus={updateFocus}
-                updateBlockType={updateBlockType}
               />
             );
 
@@ -185,14 +177,13 @@ function App() {
             return (
               <ParagraphField
                 block={c}
-                update={update}
+                update={updateBlock}
                 key={c.key}
                 addModule={addModule}
                 isFocused={isFocused.current}
                 removeBlock={removeBlock}
                 resetFocus={resetFocus}
                 updateFocus={updateFocus}
-                updateBlockType={updateBlockType}
               />
             );
         }

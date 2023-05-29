@@ -17,7 +17,6 @@ export function ParagraphField({
   removeBlock,
   resetFocus,
   updateFocus,
-  updateBlockType,
 }: ParagraphFieldProps) {
   const preventChange = useRef<boolean>();
   const inputElement = useRef<HTMLTextAreaElement>(null);
@@ -25,13 +24,22 @@ export function ParagraphField({
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       preventChange.current = true;
-      addModule(block.key);
+      addModule(
+        {
+          type: "text",
+          data: {
+            level: "paragraph",
+          },
+        },
+        block.key
+      );
     }
   }
   function handleKeyUp(e: React.KeyboardEvent<HTMLDivElement>) {
     if (
       (e.key === "Backspace" || e.key === "Delete") &&
-      block.text.length === 0
+      block.data?.text &&
+      block.data?.text.length === 0
     ) {
       removeBlock(block.key);
     }
@@ -48,10 +56,22 @@ export function ParagraphField({
   ) {
     if (preventChange.current) {
       preventChange.current = false;
-      update(block.key, block.text);
+
+      update({
+        data: {
+          text: block.data?.text ?? "",
+        },
+        key: block.key,
+      });
       return;
     }
-    update(block.key, e.target.value);
+
+    update({
+      data: {
+        text: e.target.value,
+      },
+      key: block.key,
+    });
   }
 
   return (
@@ -59,7 +79,7 @@ export function ParagraphField({
       <BlockDialog
         block={block}
         isActive={resetFocus === block.key}
-        updateBlockType={updateBlockType}
+        updateBlock={update}
         deleteBlock={removeBlock}
         icon={<GrainIcon />}
       />
@@ -67,7 +87,7 @@ export function ParagraphField({
         inputRef={inputElement}
         id={block.key}
         multiline
-        value={block.text}
+        value={block.data?.text}
         minRows={1}
         fullWidth
         variant="standard"

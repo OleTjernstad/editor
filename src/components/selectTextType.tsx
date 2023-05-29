@@ -8,23 +8,16 @@ import MenuItem from "@mui/material/MenuItem";
 export interface SelectBlockTypeProps {
   isActive: boolean;
   block?: Block;
-  updateLevel: (key: string, level: TextLevel) => void;
-  addNewTextLevel?: (level: TextLevel) => void;
+  updateLevel: (level: TextLevel) => void;
 }
 export function SelectBlockType({
   isActive,
   block,
   updateLevel,
-  addNewTextLevel,
 }: SelectBlockTypeProps) {
   const handleChange = (event: SelectChangeEvent) => {
-    if (block) {
-      updateLevel(block.key, event.target.value as TextLevel);
-      return;
-    }
-    if (addNewTextLevel) {
-      addNewTextLevel(event.target.value as TextLevel);
-    }
+    updateLevel(event.target.value as TextLevel);
+    return;
   };
 
   return (
@@ -38,7 +31,7 @@ export function SelectBlockType({
       <Select
         labelId="block-type-select-label"
         id="block-type-select"
-        value={block?.type ?? ""}
+        value={block?.data?.level ?? ""}
         label="Age"
         onChange={handleChange}
       >

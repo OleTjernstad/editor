@@ -8,7 +8,7 @@ export type BlockImage = {
   width: number;
 };
 
-export interface Content {
+export interface Data {
   text?: string | undefined;
   level?: TextLevel | undefined;
   image?: BlockImage | undefined;
@@ -17,18 +17,23 @@ export interface Content {
 export type Block = {
   key: string;
   type: BlockType;
-  content: Content | undefined;
+  data: Data | undefined;
 };
 
-export type Blocks = Block[];
+export type Content = Block[];
 
 export interface FieldProps {
   block: Block;
-  update: (key: string, text: string) => void;
-  addModule: (keyBefore: string) => void;
+  update: (props: { data: Data; key: string }) => void;
+  addModule: (
+    props: {
+      type: BlockType;
+      data: Data;
+    },
+    activeKey: string | undefined
+  ) => void;
   isFocused: string | undefined;
   updateFocus: (key: string) => void;
   removeBlock: (key: string) => void;
   resetFocus: string | undefined;
-  updateBlockType: (key: string, type: BlockType) => void;
 }
