@@ -1,26 +1,34 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 interface EditableProps {
   content: string;
-  onChange: (val: any) => void;
+  onChange: (value: string) => void;
 }
 export function Editable({ content, onChange }: EditableProps) {
   const el = useRef<HTMLDivElement>(null);
   const lastHtml = useRef<string>();
 
-  function emitChange(originalEvt: React.KeyboardEvent<HTMLDivElement>) {
-    if (!el) return;
+  //   useEffect(() => {
+  //     if (!el.current) return;
+
+  //     // Perhaps React (whose VDOM gets outdated because we often prevent
+  //     // rerendering) did not update the DOM. So we update it manually now.
+  //     if (content !== el.current.innerHTML) {
+  //       el.current.innerHTML = content;
+  //     }
+  //     lastHtml.current = content;
+  //     replaceCaret(el.current);
+  //   });
+
+  function emitChange() {
+    if (!el.current) return;
 
     const html = el.current?.innerHTML;
     if (onChange && html !== lastHtml.current) {
       // Clone event with Object.assign to avoid
       // "Cannot assign to read only property 'target' of object"
-      const evt = Object.assign({}, originalEvt, {
-        target: {
-          value: normalizeHtml(html ?? ""),
-        },
-      });
-      onChange(evt);
+
+      onChange(normalizeHtml(html ?? ""));
     }
     lastHtml.current = html;
   }
@@ -31,8 +39,7 @@ export function Editable({ content, onChange }: EditableProps) {
           ref={el}
           contentEditable
           dangerouslySetInnerHTML={{ __html: content }}
-          onKeyDown={emitChange}
-          onInput={emitChange}
+          onBlur={emitChange}
           style={{ whiteSpace: "pre-wrap" }}
         ></p>
       </div>
@@ -46,3 +53,22 @@ function normalizeHtml(str: string): string {
     str && str.replace(/&nbsp;|\u202F|\u00A0/g, " ").replace(/<br \/>/g, "<br>")
   );
 }
+
+// function replaceCaret(el: HTMLElement) {
+//   // Place the caret at the end of the element
+//   const target = document.createTextNode("");
+//   el.appendChild(target);
+//   // do not move caret if element was not focused
+//   const isTargetFocused = document.activeElement === el;
+//   if (target !== null && target.nodeValue !== null && isTargetFocused) {
+//     const sel = window.getSelection();
+//     if (sel !== null) {
+//       const range = document.createRange();
+//       range.setStart(target, target.nodeValue.length);
+//       range.collapse(true);
+//       sel.removeAllRanges();
+//       sel.addRange(range);
+//     }
+//     if (el instanceof HTMLElement) el.focus();
+//   }
+// }

@@ -1,6 +1,5 @@
-import { useRef, useState } from "react";
-
 import { Editable } from "./editable";
+import { useRef } from "react";
 
 function App() {
   // const [content, setContent] = useState<Content>([
@@ -30,12 +29,26 @@ function App() {
   //   },
   // ]);
 
-  const [text, setText] = useState<string>(
-    "Tekst                                             gg"
-  );
+  // const [text, setText] = useState<string>(
+  //   "Tekst                                             gg"
+  // );
+  const text = useRef<string>("");
 
   console.log({ text });
-  return <Editable content={text} onChange={console.log} />;
+  return (
+    <>
+      <button onClick={() => (text.current = text.current + " bla bla bal")}>
+        Addddd
+      </button>
+      <Editable
+        content={text.current}
+        onChange={(e) => {
+          text.current = e;
+          console.log(e);
+        }}
+      />
+    </>
+  );
 }
 
 export default App;
